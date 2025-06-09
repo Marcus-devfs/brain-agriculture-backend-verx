@@ -112,9 +112,9 @@ O script sobe um container PostgreSQL temporário chamado pg-test para testes, d
 
 O backend está configurado para rodar em uma instância Amazon EC2 com Docker, exposto na porta 3000 do IP público da máquina.
 
-Exemplo de acesso à API:
+URL acesso à API:
 
-http://<IP-DA-EC2>:3000
+http://52.87.237.21:3000
 📝 Considerações finais
 
 Este backend é a API para o frontend Brain Agriculture, seguindo boas práticas de desenvolvimento com TypeScript, testes automatizados e containerização.
