@@ -8,6 +8,6 @@ export interface ProposalAttributes {
     areaAgricultavel: number;
     areaVegetacao: number;
     areaTotal: number;
-    tipoCultivo: string[]; 
+    tipoCultivo: string[] | string;
     valorProposta: number;
   }

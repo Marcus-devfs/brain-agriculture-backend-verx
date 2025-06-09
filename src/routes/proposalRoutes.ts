@@ -5,6 +5,8 @@ const router = Router();
 
 router.get('/', (_, res: any) => res.json({ message: 'Hello World' }));
 router.get('/proposals', CreditProposalController.getAll);
+router.get('/proposal/:id', CreditProposalController.get);
+router.get('/dashboard', CreditProposalController.dashboard);
 router.post('/proposal/create', CreditProposalController.create);
 router.put('/proposal/update/:id', CreditProposalController.update);
 router.delete('/proposal/delete/:id', CreditProposalController.remove);
