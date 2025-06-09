@@ -68,6 +68,21 @@ volumes:
 O backend expõe a porta 3000 e conecta ao banco PostgreSQL pelo serviço db dentro da rede Docker.
 ⚙️ Como rodar a aplicação
 
+
+🔐 Proxy reverso e HTTPS com Nginx
+A aplicação backend está protegida por HTTPS via certificado gratuito da Let’s Encrypt, usando Certbot para a emissão e renovação automática do certificado.
+
+O Nginx está configurado como proxy reverso para rotear as requisições externas do domínio público para o serviço backend Node.js que roda dentro do Docker na porta 3000.
+
+Principais pontos da configuração:
+
+Domínio: brain-agriculture-backend.duckdns.org (DNS dinâmico via DuckDNS)
+Proxy reverso Nginx escuta na porta 80 e 443 (HTTP/HTTPS)
+Certificado SSL gerenciado pelo Certbot/Let's Encrypt
+Redirecionamento automático de HTTP para HTTPS
+Proxy para http://localhost:3000 (porta do backend Node.js)
+Isso garante uma camada segura (HTTPS) para o consumo da API, mesmo rodando dentro de containers Docker e em instância EC2.
+
 Pré-requisitos
 Docker e Docker Compose instalados na máquina
 Porta 3000 livre (para o backend)
@@ -114,7 +129,7 @@ O backend está configurado para rodar em uma instância Amazon EC2 com Docker, 
 
 URL acesso à API:
 
-http://52.87.237.21:3000
+https://brain-agriculture-backend.duckdns.org
 📝 Considerações finais
 
 Este backend é a API para o frontend Brain Agriculture, seguindo boas práticas de desenvolvimento com TypeScript, testes automatizados e containerização.
