@@ -1,0 +1,68 @@
+name: Deploy app to AWS EC2
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH key
+        run: |
+          echo "🔑 Salvando a chave SSH"
+          echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+          chmod 600 key.pem
+          echo "✅ Chave SSH configurada"
+
+      - name: Add EC2 to known hosts
+        run: |
+          echo "🔐 Adicionando EC2 à lista de hosts conhecidos"
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          echo "✅ Host adicionado"
+
+      - name: Cleanup old containers and app folder on EC2
+        run: |
+          echo "🧹 Limpando containers e volumes parados e removendo app antigo no EC2"
+          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            echo "🧹 Limpando containers e volumes Docker..."
+            docker system prune -af --volumes
+            echo "🧹 Removendo arquivos antigos da aplicação..."
+            rm -rf /home/ubuntu/app/*
+            echo "✅ Limpeza concluída"
+          EOF
+
+      - name: Install rsync
+        run: |
+          echo "📦 Instalando rsync para transferência eficiente de arquivos"
+          sudo apt-get update && sudo apt-get install -y rsync
+          echo "✅ rsync instalado"
+
+      - name: Sync project files to EC2
+        run: |
+          echo "🚀 Sincronizando arquivos para o EC2"
+          rsync -avz --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='*.log' \
+            -e "ssh -i key.pem -o StrictHostKeyChecking=no" \
+            ./ ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/app
+          echo "✅ Sincronização concluída"
+
+      - name: Run Docker Compose on EC2
+        run: |
+          echo "🐳 Subindo containers Docker no EC2"
+          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /home/ubuntu/app
+            echo "⬇️ Parando containers antigos"
+            docker-compose down
+            echo "⬆️ Subindo containers com build atualizado"
+            docker-compose up --build -d
+            echo "✅ Containers rodando"
+          EOF
